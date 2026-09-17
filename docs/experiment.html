@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reading Experiment</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="plugin-mouse-reading.js"></script>
+
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <style>
+    </style>
+</head>
+
+<body></body>
+<script>
+
+    var jsPsych;
+    var runOnServer = (typeof jatos !== 'undefined');
+    const exampleSentence = "A room without books is like a body without a soul."
+    const textFont = "Arial";
+    const textSizePx = 14;
+    
+    var runExperiment = () => {
+        
+        jsPsych = initJsPsych({
+            show_progress_bar: true,
+            message_progress_bar: 'Progress', 
+            on_finish: function () {
+                var resultData = jsPsych.data.get().json();
+                if (runOnServer) {
+                    jatos.submitResultData(sentData, jatos.startNextComponent);
+                } else {
+                    jsPsych.data.displayData();
+                    //jsPsych.data.get().localSave('json', "localsave.json");
+                }
+            }
+        });
+        var timeline = [];
+        const readingTrial = {
+            type: jsPsychMouseReading,
+            text_lines: [exampleSentence],
+            line_height: 32,
+            text_offset: [50, 50],
+            aperture_shape: "roundrectangular",
+            aperture_width: 100, // 60
+            aperture_height: 120,
+            aperture_blur: 2, 
+            button_offset: [30, 10],
+            button_size: 20,
+            font_family: textFont,
+            font_size: `${textSizePx}pt`,
+            font_color: "black",
+            canvas_colour: "white", 
+            store_image_data: false,
+            canvas_size: [80, 960],
+            data: {
+                record: { sentence: exampleSentence, condition: "famousquote", }, 
+            }
+        };
+
+        timeline.push(readingTrial);
+
+        jsPsych.run(timeline);
+    };
+
+    // start the experiment via JATOS or directly 
+    if (runOnServer) {
+        jatos.onLoad(function () { runExperiment(); });
+    } else {
+        runExperiment();
+    }
+
+</script>
+
+</html>
